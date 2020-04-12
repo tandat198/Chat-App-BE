@@ -11,7 +11,7 @@ app.use("/api", cors(), require("./routes/api"));
 
 mongoose.connect(
     `mongodb+srv://datng198:Dat12345678@cluster0-xejqn.mongodb.net/test?retryWrites=true&w=majority`,
-    { useNewUrlParser: true, useUnifiedTopology: true },
+    { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true },
     () => console.log("Connect to MongoDB successfully")
 );
 

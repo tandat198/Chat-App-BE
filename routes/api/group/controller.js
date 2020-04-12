@@ -29,9 +29,9 @@ const addNewUserToGroup = async (req, res) => {
     const { groupId, userId } = req.body;
 
     try {
-        const user = await User.findOne({ _id: userId });
+        const user = await User.findById(userId);
         if (!user) return res.status(400).json({ error: "User does not exist" });
-        const group = await Group.findOne({ _id: groupId });
+        const group = await Group.findById(groupId);
         if (!group) return res.status(404).json({ error: "Group not found" });
 
         const usersInGroup = group.users;
@@ -60,10 +60,23 @@ const getGroups = async (req, res) => {
 const deleteGroup = async (req, res) => {
     const { id } = req.params;
     try {
-        await Group.deleteOne({ _id: id })
-        await GroupMessage.deleteOne({ groupId: id })
+        const group = await Group.findById(id)
+        const usersInGroup = group.users;
 
-        return res.status(200).json({ message: 'Delete group successfully', group: { id } })
+        let promiseList = [];
+        for (let i = 0; i < usersInGroup.length; i++) {
+            promiseList.push(User.findById(usersInGroup[i]))
+        }
+        const userList = await Promise.all(promiseList);
+
+        for (let i = 0; i < userList.length; i++) {
+            userList[i].groups.pull({ _id: id })
+        }
+
+        await Promise.all(userList.map(user => user.save()));
+        await Promise.all([GroupMessage.deleteOne({ groupId: id }), Group.deleteOne({ _id: id })])
+
+        return res.status(200).json({ message: 'Delete group successfully', group })
     } catch (error) {
         return res.status(400).json({ error })
     }
