@@ -4,7 +4,8 @@ const { GroupSchema } = require("./Group");
 const UserSchema = new mongoose.Schema({
     email: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     password: {
         type: String,
@@ -18,7 +19,10 @@ const UserSchema = new mongoose.Schema({
         type: String,
         default: "client"
     },
-    groups: [GroupSchema]
+    groups: {
+        type: [GroupSchema],
+        ref: 'Group'
+    }
 });
 
 const User = new mongoose.model("User", UserSchema);
