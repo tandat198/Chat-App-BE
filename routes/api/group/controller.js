@@ -57,7 +57,7 @@ const getGroups = async (req, res) => {
     }
 };
 
-const deleteGroup = (req, res) => {
+const deleteGroup = async (req, res) => {
     const { id } = req.params;
     try {
         const group = await Group.deleteOne({ _id: id })
