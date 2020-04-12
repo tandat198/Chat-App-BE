@@ -57,8 +57,19 @@ const getGroups = async (req, res) => {
     }
 };
 
+const deleteGroup = (req, res) => {
+    const { id } = req.params;
+    try {
+        Group.deleteOne({ _id: id })
+        return res.status(200).json({ message: 'Delete group successfully' })
+    } catch (error) {
+        return res.status(400).json({ error })
+    }
+}
+
 module.exports = {
     createGroup,
     addNewUserToGroup,
-    getGroups
+    getGroups,
+    deleteGroup
 };
