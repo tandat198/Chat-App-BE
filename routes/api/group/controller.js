@@ -60,8 +60,8 @@ const getGroups = async (req, res) => {
 const deleteGroup = (req, res) => {
     const { id } = req.params;
     try {
-        Group.deleteOne({ _id: id })
-        return res.status(200).json({ message: 'Delete group successfully' })
+        const group = await Group.deleteOne({ _id: id })
+        return res.status(200).json({ message: 'Delete group successfully', group })
     } catch (error) {
         return res.status(400).json({ error })
     }
