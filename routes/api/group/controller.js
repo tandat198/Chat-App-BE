@@ -17,7 +17,7 @@ const getUsersInGroup = async (req, res) => {
     try {
         const group = await Group.findById(id);
         const usersInGroup = group.users;
-        const users = await User.where('_id').in(usersInGroup)
+        const users = await User.where('_id').in(usersInGroup).select(['_id', 'name', 'email'])
         return res.status(200).json({ users })
     } catch (error) {
         return res.status(500).json({ error })
@@ -66,7 +66,7 @@ const addNewUserToGroup = async (req, res) => {
         await Promise.all([group.save(), user.save()]);
 
         const usersIdAfterSaved = group.users;
-        const users = await User.where('_id').in(usersIdAfterSaved).select(['_id', 'email', 'name'])
+        const users = await User.where('_id').in(usersIdAfterSaved).select(['_id', 'name', 'email'])
         return res.status(200).json({ users });
     } catch (error) {
         return res.status(400).json({ error });
