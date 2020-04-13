@@ -30,12 +30,12 @@ const addNewUserToGroup = async (req, res) => {
 
     try {
         const user = await User.findOne({ email })
-        if (!user) return res.status(400).json({ error: "User does not exist" });
+        if (!user) return res.status(404).json({ error: "User does not exist" });
         const group = await Group.findById(groupId);
         if (!group) return res.status(404).json({ error: "Group not found" });
 
         const usersInGroup = group.users;
-        const duplicateUser = usersInGroup.find(id => id == userId);
+        const duplicateUser = usersInGroup.find(id => id == user._id);
         if (duplicateUser) return res.status(500).json({ error: "User is already in this group" });
 
         group.users.push(user.id);
