@@ -35,7 +35,7 @@ const addNewUserToGroup = async (req, res) => {
         if (!group) return res.status(404).json({ error: "Group not found" });
 
         const usersInGroup = group.users;
-        const duplicateUser = usersInGroup.find(id => id == user._id);
+        const duplicateUser = usersInGroup.find(id => id === user._id);
         if (duplicateUser) return res.status(500).json({ error: "User is already in this group" });
 
         group.users.push(user.id);
