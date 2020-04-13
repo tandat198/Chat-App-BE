@@ -26,10 +26,10 @@ const createGroup = async (req, res) => {
 };
 
 const addNewUserToGroup = async (req, res) => {
-    const { groupId, userId } = req.body;
+    const { groupId, email } = req.body;
 
     try {
-        const user = await User.findById(userId);
+        const user = await User.findOne({ email })
         if (!user) return res.status(400).json({ error: "User does not exist" });
         const group = await Group.findById(groupId);
         if (!group) return res.status(404).json({ error: "Group not found" });
