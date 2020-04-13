@@ -2,6 +2,29 @@ const { Group } = require("../../../models/Group");
 const GroupMessage = require("../../../models/GroupMessage");
 const { User } = require("../../../models/User");
 
+const getGroupsOfUser = async (req, res) => {
+    const { email } = req.user;
+    try {
+        const user = await User.findOne({ email });
+        return res.status(200).json({ groups: user.groups });
+    } catch (error) {
+        res.status(400).json({ error });
+    }
+};
+
+const getUsersInGroup = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const group = await Group.findById(id);
+        const usersInGroup = group.users;
+        const users = await User.where('_id').in(usersInGroup)
+        return res.status(200).json({ users })
+    } catch (error) {
+        return res.status(500).json({ error })
+    }
+
+}
+
 const createGroup = async (req, res) => {
     const { name } = req.body;
     const { email } = req.user;
@@ -50,16 +73,6 @@ const addNewUserToGroup = async (req, res) => {
     }
 };
 
-const getGroups = async (req, res) => {
-    const { email } = req.user;
-    try {
-        const user = await User.findOne({ email });
-        return res.status(200).json({ groups: user.groups });
-    } catch (error) {
-        res.status(400).json({ error });
-    }
-};
-
 const deleteGroup = async (req, res) => {
     const { id } = req.params;
     try {
@@ -86,8 +99,9 @@ const deleteGroup = async (req, res) => {
 }
 
 module.exports = {
+    getGroupsOfUser,
+    getUsersInGroup,
     createGroup,
     addNewUserToGroup,
-    getGroups,
     deleteGroup
 };
