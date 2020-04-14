@@ -65,17 +65,16 @@ const signIn = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(403).json({ error: "password does not match" });
 
-    const { _id, name, groups } = user;
+    const { _id, name } = user;
 
     const token = await createToken({ email, _id, name });
     return res.status(200).json({
+        token,
         user: {
             email,
             _id,
             name
-        },
-        groups,
-        token
+        }
     });
 };
 
