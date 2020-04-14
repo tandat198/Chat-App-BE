@@ -2,7 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const port = process.env.PORT || 5000;
-//
+const { Message } = require("./models/Message");
+const GroupMessage = require("./models/GroupMessage");
 const app = express();
 // app.use((req, res, next) => {
 //     res.setHeader("Access-Control-Allow-Origin", "*");
@@ -10,22 +11,10 @@ const app = express();
 //     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE");
 //     next();
 // });
-app.use(cors());
-
-const server = require("http").Server(app);
-
-const io = require("socket.io")(server);
-
-io.on("connection", function (socket) {
-    socket.emit("news", { hello: "world" });
-    socket.on("my other event", function (data) {
-        console.log(data);
-    });
-});
 
 app.use(express.json());
 
-app.use("/api", require("./routes/api"));
+app.use("/api", cors(), require("./routes/api"));
 
 mongoose.connect(
     `mongodb+srv://datng198:Dat12345678@cluster0-xejqn.mongodb.net/test?retryWrites=true&w=majority`,
@@ -33,4 +22,25 @@ mongoose.connect(
     () => console.log("Connect to MongoDB successfully")
 );
 
-app.listen(port, () => console.log(`Server is running on port ${port}`));
+const server = app.listen(port, () => console.log(`Server is running on port ${port}`));
+
+const io = require("socket.io").listen(server);
+
+io.on("connection", function (socket) {
+    console.log("Connected");
+
+    socket.on("room", async function (data) {
+        socket.join(data.room._id);
+        if (data.msg && data.room._id) {
+            io.to(data.room._id).emit("sendMsgFromServer", `msg from server to room ${data.room._id}: ${data.msg} by ${data.user.name}`);
+            const message = new Message({
+                senderId: data.user._id,
+                senderName: data.user.name,
+                text: data.msg
+            });
+            const groupMessage = await GroupMessage.findOne({ groupId: data.room._id });
+            groupMessage.messages.push(message);
+            groupMessage.save();
+        }
+    });
+});
