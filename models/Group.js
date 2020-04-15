@@ -7,8 +7,16 @@ const GroupSchema = new mongoose.Schema({
     },
     users: {
         type: [mongoose.Schema.Types.ObjectId],
-        ref: 'User'
+        ref: "User"
     }
+});
+
+GroupSchema.method("transform", function () {
+    const obj = this.toObject();
+
+    obj.id = obj._id;
+    delete obj._id;
+    return obj;
 });
 
 const Group = new mongoose.model("Group", GroupSchema);

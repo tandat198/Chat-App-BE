@@ -21,8 +21,17 @@ const UserSchema = new mongoose.Schema({
     },
     groups: {
         type: [GroupSchema],
-        ref: 'Group'
+        ref: "Group"
     }
+});
+
+UserSchema.method("transform", function () {
+    let obj = this.toObject();
+
+    obj.id = obj._id;
+    delete obj._id;
+
+    return obj;
 });
 
 const User = new mongoose.model("User", UserSchema);

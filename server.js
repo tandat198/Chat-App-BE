@@ -37,6 +37,7 @@ io.on("connection", function (socket) {
                 senderName: data.user.name,
                 text: data.msg
             });
+            console.log(data);
             io.to(data.room._id).emit("sendMsgFromServer", message);
             const groupMessage = await GroupMessage.findOne({ groupId: data.room._id });
             groupMessage.messages.push(message);

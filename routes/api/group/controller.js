@@ -6,7 +6,12 @@ const getGroupsOfUser = async (req, res) => {
     const { email } = req.user;
     try {
         const user = await User.findOne({ email });
-        return res.status(200).json({ groups: user.groups });
+        const groupsOfUser = user.groups;
+        const resGroups = [];
+        for (let group of groupsOfUser) {
+            resGroups.push(group.transform());
+        }
+        return res.status(200).json({ groups: resGroups });
     } catch (error) {
         res.status(400).json({ error });
     }
@@ -17,8 +22,14 @@ const getUsersInGroup = async (req, res) => {
     try {
         const group = await Group.findById(id);
         const usersInGroup = group.users;
-        const users = await User.where("_id").in(usersInGroup).select(["_id", "name", "email"]);
-        return res.status(200).json({ users });
+        const users = await User.where("_id").in(usersInGroup).select(["id", "name", "email"]);
+        const resUser = [];
+
+        for (let user of users) {
+            resUser.push(user.transform());
+        }
+
+        return res.status(200).json({ users: resUser });
     } catch (error) {
         return res.status(500).json({ error });
     }
@@ -37,11 +48,11 @@ const createGroup = async (req, res) => {
             users: [user.id]
         });
         const groupMessage = new GroupMessage({
-            groupId: group._id
+            groupId: group.id
         });
         user.groups.push(group);
         await Promise.all([group.save(), groupMessage.save(), user.save()]);
-        return res.status(201).json({ group });
+        return res.status(201).json({ group: group.transform() });
     } catch (error) {
         return res.status(500).json({ error });
     }
@@ -57,7 +68,7 @@ const addNewUserToGroup = async (req, res) => {
         if (!group) return res.status(404).json({ error: "Group not found" });
 
         const usersInGroup = group.users;
-        const duplicateUser = usersInGroup.find(id => id === user._id);
+        const duplicateUser = usersInGroup.find(id => id === user.id);
         if (duplicateUser) return res.status(500).json({ error: "User is already in this group" });
 
         group.users.push(user.id);
@@ -65,7 +76,7 @@ const addNewUserToGroup = async (req, res) => {
         await Promise.all([group.save(), user.save()]);
 
         const resUser = {
-            _id: user._id,
+            id: user.id,
             name: user.name,
             email: user.email
         };
@@ -88,13 +99,13 @@ const deleteGroup = async (req, res) => {
         const userList = await Promise.all(promiseList);
 
         for (let i = 0; i < userList.length; i++) {
-            userList[i].groups.pull({ _id: id });
+            userList[i].groups.pull({ id });
         }
 
         await Promise.all(userList.map(user => user.save()));
         await Promise.all([GroupMessage.deleteOne({ groupId: id }), Group.deleteOne({ _id: id })]);
 
-        return res.status(200).json({ message: "Delete group successfully", group });
+        return res.status(200).json({ message: "Delete group successfully", group: group.transform() });
     } catch (error) {
         return res.status(400).json({ error });
     }

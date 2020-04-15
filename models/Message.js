@@ -12,6 +12,15 @@ const MessageSchema = new mongoose.Schema({
         required: true
     }
 });
+
+MessageSchema.method("transform", function () {
+    const obj = this.toObject();
+
+    obj.id = obj._id;
+    delete obj._id;
+    return obj;
+});
+
 const Message = new mongoose.model("Message", MessageSchema);
 
 module.exports = {
