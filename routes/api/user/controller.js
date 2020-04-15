@@ -9,7 +9,7 @@ const hashPass = promisify(bcrypt.hash);
 
 const createToken = async payload => {
     try {
-        const token = await jwt.sign(payload, "fd@fd!/fd?21?A", { expiresIn: "3h" });
+        const token = await jwt.sign(payload, "fd@fd!/fd?21?A", { expiresIn: "24d" });
         return token;
     } catch (err) {
         return res.status(500).json({ err });
