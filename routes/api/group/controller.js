@@ -99,7 +99,7 @@ const deleteGroup = async (req, res) => {
         const userList = await Promise.all(promiseList);
 
         for (let i = 0; i < userList.length; i++) {
-            userList[i].groups.pull({ id });
+            userList[i].groups.pull({ _id: id });
         }
 
         await Promise.all(userList.map(user => user.save()));
