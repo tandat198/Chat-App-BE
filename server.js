@@ -31,6 +31,7 @@ io.on("connection", function (socket) {
 
     socket.on("room", async function (data) {
         socket.join(data.room.id);
+        io.to(data.room.id).emit("sendMsgFromServer", "user connected");
         if (data.msg && data.room.id) {
             const message = new Message({
                 senderId: data.user.id,
