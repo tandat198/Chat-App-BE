@@ -29,19 +29,22 @@ const io = require("socket.io").listen(server);
 io.on("connection", function (socket) {
     console.log("Connected");
 
+    io.emit("sendMsgFromServer", "msg from server");
     socket.on("room", async function (data) {
         socket.join(data.room.id);
-        io.to(data.room.id).emit("sendMsgFromServer", "user connected");
+
+        io.emit("sendMsgFromServer", "connected to server");
         if (data.msg && data.room.id) {
             const message = new Message({
                 senderId: data.user.id,
                 senderName: data.user.name,
                 text: data.msg
             });
-            console.log(data);
-            io.to(data.room.id).emit("sendMsgFromServer", message);
+
+            io.to(data.room.id).emit("sendMsgFromServer", message.transform());
             const groupMessage = await GroupMessage.findOne({ groupId: data.room.id });
             groupMessage.messages.push(message);
+            console.log(groupMessage.messages.length);
             groupMessage.save();
         }
     });

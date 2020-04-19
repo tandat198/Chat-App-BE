@@ -1,9 +1,12 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const multer = require("multer");
 const isEmpty = require("validator/lib/isEmpty");
 const isEmail = require("validator/lib/isEmail");
 const { User } = require("../../../models/User");
 const { promisify } = require("util");
+
+const uploadFile = require("../../../middlewares/uploadImage");
 
 const hashPass = promisify(bcrypt.hash);
 
@@ -31,10 +34,13 @@ const createUser = async (req, res) => {
         if (password.length < 8) errors.password = "Password is too weak";
         if (password !== confirmPassword) errors.confirmPassword = "password and confirmPassword does not match";
         if (!isEmail(email)) errors.email = "Email is not valid";
-        if (Object.keys(errors).length) return res.status(500).json(errors);
+        if (Object.keys(errors).length) return res.status(500).json({ error: errors });
 
         const user = await User.findOne({ email });
-        if (user) return res.status(400).json({ email: "Email already exists" });
+        if (user) {
+            errors.email = "Email already exists";
+            return res.status(400).json({ error: errors });
+        }
         const hash = await hashPass(password, 10);
 
         const newUser = new User({
@@ -43,7 +49,6 @@ const createUser = async (req, res) => {
             password: hash
         });
         await newUser.save();
-
         const { id } = newUser;
         const token = await createToken({ id, email, name });
         return res.status(201).json({ token, user: { id, email, name } });
@@ -61,7 +66,7 @@ const signIn = async (req, res) => {
     }
     if (Object.keys(errors).length) return res.status(500).json(errors);
 
-    const user = await User.findOne({ email }).select(["id", "email", "password"]);
+    const user = await User.findOne({ email }).select(["id", "email", "password", "name"]);
     console.log(user.id);
     if (!user) return res.status(500).json({ error: "email does not exist" });
 
@@ -69,6 +74,7 @@ const signIn = async (req, res) => {
     if (!isMatch) return res.status(403).json({ error: "password does not match" });
 
     const { id, name } = user;
+    console.log(user);
 
     const token = await createToken({ id, email, name });
     return res.status(200).json({
@@ -81,7 +87,20 @@ const signIn = async (req, res) => {
     });
 };
 
+const uploadAvatar = (req, res) => {
+    uploadFile("profile")(req, res, function (err) {
+        if (err instanceof multer.MulterError) {
+            ["name", "storageErrors"].forEach(e => delete err[e]);
+            return res.status(400).json({ error: err });
+        } else if (err) {
+            return res.status(400).json({ error: err });
+        }
+        return res.status(200).json({ file: req.file });
+    });
+};
+
 module.exports = {
     createUser,
-    signIn
+    signIn,
+    uploadAvatar
 };
