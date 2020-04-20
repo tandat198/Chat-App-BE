@@ -10,29 +10,38 @@ const s3 = new aws.S3({
     secretAccessKey: SECRET
 });
 
-const uploadAvatar = (req, res, next) => {
-    return multer({
-        storage: multerS3({
-            s3,
-            bucket: BUCKET_NAME,
-            acl: "public-read",
-            metadata: function (req, file, cb) {
-                cb(null, { fieldName: `${file.originalname}` });
-            },
-            key: function (req, file, cb) {
-                cb(null, `${Date.now().toString()}`);
-            }
-        }),
-        limits: {
-            fileSize: 3 * Math.pow(1024, 2)
+const upload = multer({
+    storage: multerS3({
+        s3,
+        bucket: BUCKET_NAME,
+        acl: "public-read",
+        metadata: function (req, file, cb) {
+            cb(null, { fieldName: `${file.originalname}` });
+        },
+        key: function (req, file, cb) {
+            cb(null, `${Date.now().toString()}`);
         }
-    }).single("profile")(req, res, function (err) {
+    }),
+    limits: {
+        fileSize: 3 * Math.pow(1024, 2)
+    }
+});
+
+const uploadSingle = (type, req, res) => {
+    return upload.single(type)(req, res, function (err) {
         if (err instanceof multer.MulterError) {
             ["name", "storageErrors"].forEach(e => delete err[e]);
             return res.status(400).json({ error: err });
+        } else if (err) {
+            return res.status(400).json({ error: err });
+        } else {
+            return res.status(200).json({ linkUrl: req.file.location });
         }
-        next();
     });
+};
+
+const uploadAvatar = (req, res) => {
+    uploadSingle("profile", req, res);
 };
 
 module.exports = {

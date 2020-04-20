@@ -87,10 +87,11 @@ const signIn = async (req, res) => {
 const updateAvatar = async (req, res) => {
     try {
         const { id } = req.user;
+        const { linkUrl } = req.body;
         const user = await User.findById(id);
         if (!user) return res.status(404).json({ error: "User not found" });
-        user.avatar = req.file.location;
-        return res.status(200).json({ file: req.file.location });
+        user.avatar = linkUrl;
+        return res.status(200).json({ linkUrl });
     } catch (error) {
         return res.status(400).json({ error });
     }
