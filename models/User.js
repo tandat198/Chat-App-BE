@@ -22,7 +22,8 @@ const UserSchema = new mongoose.Schema({
     groups: {
         type: [GroupSchema],
         ref: "Group"
-    }
+    },
+    avatar: String
 });
 
 UserSchema.method("transform", function () {

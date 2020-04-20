@@ -1,12 +1,9 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const multer = require("multer");
 const isEmpty = require("validator/lib/isEmpty");
 const isEmail = require("validator/lib/isEmail");
 const { User } = require("../../../models/User");
 const { promisify } = require("util");
-
-const uploadFile = require("../../../middlewares/uploadImage");
 
 const hashPass = promisify(bcrypt.hash);
 
@@ -87,20 +84,20 @@ const signIn = async (req, res) => {
     });
 };
 
-const uploadAvatar = (req, res) => {
-    uploadFile("profile")(req, res, function (err) {
-        if (err instanceof multer.MulterError) {
-            ["name", "storageErrors"].forEach(e => delete err[e]);
-            return res.status(400).json({ error: err });
-        } else if (err) {
-            return res.status(400).json({ error: err });
-        }
-        return res.status(200).json({ file: req.file });
-    });
+const updateAvatar = async (req, res) => {
+    try {
+        const { id } = req.user;
+        const user = await User.findById(id);
+        if (!user) return res.status(404).json({ error: "User not found" });
+        user.avatar = req.file.location;
+        return res.status(200).json({ file: req.file.location });
+    } catch (error) {
+        return res.status(400).json({ error });
+    }
 };
 
 module.exports = {
     createUser,
     signIn,
-    uploadAvatar
+    updateAvatar
 };
