@@ -6,7 +6,7 @@ const { authenticate } = require("../../../middlewares/auth");
 
 router.post("/signup", userController.createUser);
 router.post("/signin", userController.signIn);
-router.post("/updateAvatar", authenticate, userController.updateAvatar);
+router.post("/updateProfilePhoto", authenticate, userController.updateProfilePhoto);
 router.post("/upload", authenticate, upload.uploadAvatar);
 
 module.exports = router;

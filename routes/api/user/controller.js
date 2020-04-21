@@ -63,34 +63,33 @@ const signIn = async (req, res) => {
     }
     if (Object.keys(errors).length) return res.status(500).json(errors);
 
-    const user = await User.findOne({ email }).select(["id", "email", "password", "name"]);
-    console.log(user.id);
+    const user = await User.findOne({ email }).select(["id", "email", "password", "name", "profilePhoto", 'coverPhoto']);
     if (!user) return res.status(500).json({ error: "email does not exist" });
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(403).json({ error: "password does not match" });
 
-    const { id, name } = user;
-    console.log(user);
+    const resData = {};
+    const resColumns = ['id', 'email', 'name', 'coverPhoto', 'profilePhoto']
+    for (let col of resColumns) {
+        resData[col] = user[col]
+    }
 
-    const token = await createToken({ id, email, name });
+
+    const token = await createToken(resData);
     return res.status(200).json({
         token,
-        user: {
-            id,
-            email,
-            name
-        }
+        user: resData
     });
 };
 
-const updateAvatar = async (req, res) => {
+const updateProfilePhoto = async (req, res) => {
     try {
         const { id } = req.user;
         const { linkUrl } = req.body;
         const user = await User.findById(id);
         if (!user) return res.status(404).json({ error: "User not found" });
-        user.avatar = linkUrl;
+        user.profilePhoto = linkUrl;
         return res.status(200).json({ linkUrl });
     } catch (error) {
         return res.status(400).json({ error });
@@ -100,5 +99,5 @@ const updateAvatar = async (req, res) => {
 module.exports = {
     createUser,
     signIn,
-    updateAvatar
+    updateProfilePhoto
 };
