@@ -9,7 +9,7 @@ const hashPass = promisify(bcrypt.hash);
 
 const createToken = async payload => {
     try {
-        const token = await jwt.sign(payload, "fd@fd!/fd?21?A", { expiresIn: "2h" });
+        const token = await jwt.sign(payload, "fd@fd!/fd?21?A", { expiresIn: "20000" });
         return token;
     } catch (err) {
         return res.status(500).json({ err });
@@ -96,8 +96,23 @@ const updateProfilePhoto = async (req, res) => {
     }
 };
 
+const updateCoverPhoto = (req, res) => {
+    try {
+        const { id } = req.user;
+        const { linkUrl } = req.body;
+        const user = await User.findById(id);
+        if (!user) return res.status(404).json({ error: "User not found" });
+        user.coverPhoto = linkUrl;
+        await user.save()
+        return res.status(200).json({ linkUrl });
+    } catch (error) {
+        return res.status(400).json({ error });
+    }
+}
+
 module.exports = {
     createUser,
     signIn,
-    updateProfilePhoto
+    updateProfilePhoto,
+    updateCoverPhoto
 };
