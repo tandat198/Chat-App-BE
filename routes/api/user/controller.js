@@ -90,13 +90,13 @@ const updateProfilePhoto = async (req, res) => {
         if (!user) return res.status(404).json({ error: "User not found" });
         user.profilePhoto = linkUrl;
         await user.save()
-        return res.status(200).json({ linkUrl });
+        return res.status(200).json({ linkUrl, message: 'Update profile photo successfully' });
     } catch (error) {
         return res.status(400).json({ error });
     }
 };
 
-const updateCoverPhoto = (req, res) => {
+const updateCoverPhoto = async (req, res) => {
     try {
         const { id } = req.user;
         const { linkUrl } = req.body;
@@ -104,7 +104,7 @@ const updateCoverPhoto = (req, res) => {
         if (!user) return res.status(404).json({ error: "User not found" });
         user.coverPhoto = linkUrl;
         await user.save()
-        return res.status(200).json({ linkUrl });
+        return res.status(200).json({ linkUrl, message: 'Update cover photo successfully' });
     } catch (error) {
         return res.status(400).json({ error });
     }
