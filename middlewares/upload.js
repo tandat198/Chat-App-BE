@@ -19,7 +19,7 @@ const upload = multer({
             cb(null, { fieldName: `${file.originalname}` });
         },
         key: function (req, file, cb) {
-            cb(null, `${Date.now().toString()}`);
+            cb(null, `${Date.now().toString()}${file.originalname}`);
         }
     }),
     limits: {
@@ -35,6 +35,7 @@ const uploadSingle = (type, req, res) => {
         } else if (err) {
             return res.status(400).json({ error: err });
         } else {
+            console.log(req.file)
             return res.status(200).json({ linkUrl: req.file.location });
         }
     });
