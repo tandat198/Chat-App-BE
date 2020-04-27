@@ -1,6 +1,8 @@
 const aws = require("aws-sdk");
 const multer = require("multer");
 const multerS3 = require("multer-s3");
+const { promisify } = require('util')
+const path = require('path')
 const BUCKET_NAME = "portfolio-dn";
 const ID = "AKIAISIE5TPSIPG2IUXA";
 const SECRET = "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";
@@ -24,6 +26,13 @@ const upload = multer({
     }),
     limits: {
         fileSize: 3 * Math.pow(1024, 2)
+    },
+    fileFilter: function (req, file, callback) {
+        var ext = path.extname(file.originalname);
+        if (ext !== '.png' && ext !== '.jpg' && ext !== '.jpeg') {
+            return callback(new Error('Only images are allowed'))
+        }
+        return callback(null, true);
     }
 });
 
@@ -41,10 +50,10 @@ const uploadSingle = (type, req, res) => {
     });
 };
 
-const uploadAvatar = (req, res) => {
+const uploadSingleImage = (req, res) => {
     uploadSingle("profile", req, res);
 };
 
 module.exports = {
-    uploadAvatar
+    uploadSingleImage
 };
