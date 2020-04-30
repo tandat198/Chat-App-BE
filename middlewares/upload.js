@@ -1,21 +1,18 @@
 const aws = require("aws-sdk");
 const multer = require("multer");
 const multerS3 = require("multer-s3");
-const { promisify } = require('util')
 const path = require('path')
-const BUCKET_NAME = "portfolio-dn";
-const ID = "AKIAISIE5TPSIPG2IUXA";
-const SECRET = "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";
+const { bucket, accessKeyId, secretAccessKey } = require('../config')
 
 const s3 = new aws.S3({
-    accessKeyId: ID,
-    secretAccessKey: SECRET
+    accessKeyId,
+    secretAccessKey
 });
 
 const upload = multer({
     storage: multerS3({
         s3,
-        bucket: BUCKET_NAME,
+        bucket,
         acl: "public-read",
         metadata: function (req, file, cb) {
             cb(null, { fieldName: `${file.originalname}` });

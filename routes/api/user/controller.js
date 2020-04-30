@@ -4,12 +4,13 @@ const isEmpty = require("validator/lib/isEmpty");
 const isEmail = require("validator/lib/isEmail");
 const { User } = require("../../../models/User");
 const { promisify } = require("util");
+const { secretKey } = require('../../../config')
 
 const hashPass = promisify(bcrypt.hash);
 
 const createToken = async payload => {
     try {
-        const token = await jwt.sign(payload, "fd@fd!/fd?21?A", { expiresIn: "1.5h" });
+        const token = await jwt.sign(payload, secretKey, { expiresIn: "2h" });
         return token;
     } catch (err) {
         return res.status(500).json({ err });

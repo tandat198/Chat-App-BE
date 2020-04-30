@@ -5,6 +5,11 @@ const port = process.env.PORT || 5000;
 const { Message } = require("./models/Message");
 const GroupMessage = require("./models/GroupMessage");
 const app = express();
+const http = require('http');
+const server = http.createServer(app);
+const socketIO = require('socket.io')
+const io = socketIO(server)
+const { mongoURI } = require('./config')
 // app.use((req, res, next) => {
 //     res.setHeader("Access-Control-Allow-Origin", "*");
 //     res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
@@ -17,35 +22,30 @@ app.use(express.json());
 app.use("/api", cors(), require("./routes/api"));
 
 mongoose.connect(
-    `mongodb+srv://datng198:Dat12345678@cluster0-xejqn.mongodb.net/test?retryWrites=true&w=majority`,
+    mongoURI,
     { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true },
     () => console.log("Connect to MongoDB successfully")
 );
 
-const server = app.listen(port, () => console.log(`Server is running on port ${port}`));
-
-const io = require("socket.io").listen(server);
-
 io.on("connection", function (socket) {
-    console.log("Connected");
-
-    io.emit("sendMsgFromServer", "msg from server");
-    socket.on("room", async function (data) {
+    socket.on("joinRoom", async function (data) {
         socket.join(data.room.id);
+    });
 
-        io.emit("sendMsgFromServer", "connected to server");
+    socket.on('room', async function (data) {
         if (data.msg && data.room.id) {
             const message = new Message({
                 senderId: data.user.id,
                 senderName: data.user.name,
                 text: data.msg
             });
-
             io.to(data.room.id).emit("sendMsgFromServer", message.transform());
+
             const groupMessage = await GroupMessage.findOne({ groupId: data.room.id });
             groupMessage.messages.push(message);
-            console.log(groupMessage.messages.length);
             groupMessage.save();
         }
-    });
+    })
 });
+
+server.listen(port, () => console.log(`Server is running on port ${port}`));
