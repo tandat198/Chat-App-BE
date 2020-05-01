@@ -1,5 +1,6 @@
 const { Group } = require("../../../models/Group");
 const GroupMessage = require("../../../models/GroupMessage");
+const { Message } = require('../../../models/Message')
 const { User } = require("../../../models/User");
 const Promise = require('bluebird');
 
@@ -48,11 +49,13 @@ const createGroup = async (req, res) => {
             name,
             users: [user.id]
         });
-        const groupMessage = new GroupMessage({
-            groupId: group.id
-        });
+        const message = new Message({
+            groupId: group.id,
+            senderId: user.id,
+            text: "Let's chat with your friends"
+        })
         user.groups.push(group);
-        await Promise.all([group.save(), groupMessage.save(), user.save()]);
+        await Promise.all([group.save(), message.save(), user.save()]);
         return res.status(201).json({ group: group.transform() });
     } catch (error) {
         return res.status(500).json({ error });

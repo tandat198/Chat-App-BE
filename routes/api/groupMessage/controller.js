@@ -1,34 +1,34 @@
-const GroupMessage = require("../../../models/GroupMessage");
-const Message = require("../../../models/Message")
+const { Message } = require("../../../models/Message")
 
 const getMessagesOfGroup = async (req, res) => {
     const { groupId } = req.query;
-    const index = JSON.parse(req.query.index);
+    const indexFromClient = +req.query.index;
 
     try {
         const groupMessages = await Message.find({ groupId })
         if (!groupMessages.length) return res.status(404).json({ message: "Group's messages not found" });
-        const resMessages = [];
 
+        const resMessages = [];
         let messages;
         let lastIndex;
         let groupMessageLength = groupMessages.length;
         let amountMessagesRes = 15;
-        if (typeof index !== "number") {
+
+        if (typeof indexFromClient !== "number") {
             return res.status(400).json({ error: "Index is invalid" });
         } else {
-            const resultDevideIndexWith15 = Math.floor(index / amountMessagesRes);
+            const resultDevideIndexWith15 = Math.floor(indexFromClient / amountMessagesRes);
             switch (resultDevideIndexWith15) {
                 case -1:
-                    lastIndex = groupMessageLength - amountMessagesRes;
+                    lastIndex = groupMessageLength > amountMessagesRes ? groupMessageLength - amountMessagesRes : 0;
                     messages = groupMessages.slice(lastIndex, groupMessageLength);
                     break;
                 case 0:
-                    messages = groupMessages.slice(0, index);
+                    messages = groupMessages.slice(0, indexFromClient);
                     break;
                 default:
-                    lastIndex = index - amountMessagesRes;
-                    messages = groupMessages.slice(lastIndex, index);
+                    lastIndex = indexFromClient - amountMessagesRes;
+                    messages = groupMessages.slice(lastIndex, indexFromClient);
                     break;
             }
         }
