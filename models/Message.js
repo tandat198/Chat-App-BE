@@ -1,6 +1,11 @@
 const mongoose = require("mongoose");
 
 const MessageSchema = new mongoose.Schema({
+    groupId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: "Group"
+    },
     senderId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,

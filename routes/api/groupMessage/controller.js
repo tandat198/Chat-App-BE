@@ -1,17 +1,18 @@
 const GroupMessage = require("../../../models/GroupMessage");
+const Message = require("../../../models/Message")
 
 const getMessagesOfGroup = async (req, res) => {
     const { groupId } = req.query;
     const index = JSON.parse(req.query.index);
 
     try {
-        const groupMessages = await GroupMessage.findOne({ groupId });
-        if (!groupMessages) return res.status(404).json({ message: "Group's messages not found" });
+        const groupMessages = await Message.find({ groupId })
+        if (!groupMessages.length) return res.status(404).json({ message: "Group's messages not found" });
         const resMessages = [];
 
         let messages;
         let lastIndex;
-        let groupMessageLength = groupMessages.messages.length;
+        let groupMessageLength = groupMessages.length;
         let amountMessagesRes = 15;
         if (typeof index !== "number") {
             return res.status(400).json({ error: "Index is invalid" });
@@ -19,15 +20,15 @@ const getMessagesOfGroup = async (req, res) => {
             const resultDevideIndexWith15 = Math.floor(index / amountMessagesRes);
             switch (resultDevideIndexWith15) {
                 case -1:
-                    lastIndex = groupMessageLength > amountMessagesRes ? groupMessageLength - amountMessagesRes : 0;
-                    messages = groupMessages.messages.slice(lastIndex, groupMessageLength);
+                    lastIndex = groupMessageLength - amountMessagesRes;
+                    messages = groupMessages.slice(lastIndex, groupMessageLength);
                     break;
                 case 0:
-                    messages = groupMessages.messages.slice(0, index);
+                    messages = groupMessages.slice(0, index);
                     break;
                 default:
                     lastIndex = index - amountMessagesRes;
-                    messages = groupMessages.messages.slice(lastIndex, index);
+                    messages = groupMessages.slice(lastIndex, index);
                     break;
             }
         }

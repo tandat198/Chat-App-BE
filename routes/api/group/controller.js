@@ -1,6 +1,7 @@
 const { Group } = require("../../../models/Group");
 const GroupMessage = require("../../../models/GroupMessage");
 const { User } = require("../../../models/User");
+const Promise = require('bluebird');
 
 const getGroupsOfUser = async (req, res) => {
     const { email } = req.user;
@@ -92,12 +93,7 @@ const deleteGroup = async (req, res) => {
         const group = await Group.findById(id);
         const usersInGroup = group.users;
 
-        let promiseList = [];
-        for (let i = 0; i < usersInGroup.length; i++) {
-            promiseList.push(User.findById(usersInGroup[i]));
-        }
-        const userList = await Promise.all(promiseList);
-
+        const userList = await Promise.map(usersInGroup, userId => User.findById(userId))
         for (let i = 0; i < userList.length; i++) {
             userList[i].groups.pull({ _id: id });
         }

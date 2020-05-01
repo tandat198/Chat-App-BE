@@ -26,18 +26,22 @@ io.on("connection", function (socket) {
         socket.join(data.room.id);
     });
 
-    socket.on('room', async function (data) {
+    socket.on('room', function (data) {
         if (data.msg && data.room.id) {
             const message = new Message({
+                groupId: data.room.id,
                 senderId: data.user.id,
                 senderName: data.user.name,
                 text: data.msg
             });
-            io.to(data.room.id).emit("sendMsgFromServer", message.transform());
+            message.save()
+                .then(message => {
+                    io.to(data.room.id).emit("sendMsgFromServer", message.transform());
+                })
 
-            const groupMessage = await GroupMessage.findOne({ groupId: data.room.id });
-            groupMessage.messages.push(message);
-            groupMessage.save();
+            // const groupMessage = await GroupMessage.findOne({ groupId: data.room.id });
+            // groupMessage.messages.push(message);
+            // groupMessage.save();
         }
     })
 });
