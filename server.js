@@ -38,10 +38,6 @@ io.on("connection", function (socket) {
                 .then(message => {
                     io.to(data.room.id).emit("sendMsgFromServer", message.transform());
                 })
-
-            // const groupMessage = await GroupMessage.findOne({ groupId: data.room.id });
-            // groupMessage.messages.push(message);
-            // groupMessage.save();
         }
     })
 });

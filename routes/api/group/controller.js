@@ -13,6 +13,7 @@ const getGroupsOfUser = async (req, res) => {
         for (let group of groupsOfUser) {
             resGroups.push(group.transform());
         }
+
         return res.status(200).json({ groups: resGroups });
     } catch (error) {
         res.status(400).json({ error });
