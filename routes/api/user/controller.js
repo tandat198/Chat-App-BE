@@ -25,7 +25,7 @@ const createUser = async (req, res) => {
         const { email, name, password, confirmPassword } = reqBody;
 
         for (let field of validatedFields) {
-            if (!reqBody[field]) errors[field] = `Please enter your ${field.toUpperCase()}`;
+            if (!reqBody[field]) errors[field] = `Please enter your ${field}`;
         }
         if (Object.keys(errors).length) return res.status(500).json(errors);
 
@@ -60,7 +60,7 @@ const signIn = async (req, res) => {
     const errors = {};
     const { email, password } = req.body;
     for (let field of validatedFields) {
-        if (isEmpty(req.body[field])) errors[field] = `${field.toUpperCase()} is required`;
+        if (isEmpty(req.body[field])) errors[field] = `${field} is required`;
     }
     if (Object.keys(errors).length) return res.status(500).json(errors);
 
