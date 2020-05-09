@@ -4,7 +4,7 @@ const isEmpty = require("validator/lib/isEmpty");
 const isEmail = require("validator/lib/isEmail");
 const { User } = require("../../../models/User");
 const { promisify } = require("util");
-const { secretKey } = require('../../../config')
+const { secretKey } = require("../../../config");
 
 const hashPass = promisify(bcrypt.hash);
 
@@ -12,8 +12,8 @@ const createToken = async payload => {
     try {
         const token = await jwt.sign(payload, secretKey, { expiresIn: "2h" });
         return token;
-    } catch (err) {
-        return res.status(500).json({ err });
+    } catch (error) {
+        return res.status(500).json({ error });
     }
 };
 
@@ -64,16 +64,16 @@ const signIn = async (req, res) => {
     }
     if (Object.keys(errors).length) return res.status(500).json(errors);
 
-    const user = await User.findOne({ email }).select(["id", "email", "password", "name", "profilePhoto", 'coverPhoto']);
+    const user = await User.findOne({ email }).select(["id", "email", "password", "name", "profilePhoto", "coverPhoto"]);
     if (!user) return res.status(500).json({ error: "email does not exist" });
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(403).json({ error: "password does not match" });
 
     const resData = {};
-    const resColumns = ['id', 'email', 'name', 'coverPhoto', 'profilePhoto']
+    const resColumns = ["id", "email", "name", "coverPhoto", "profilePhoto"];
     for (let col of resColumns) {
-        resData[col] = user[col]
+        resData[col] = user[col];
     }
 
     const token = await createToken(resData);
@@ -90,8 +90,8 @@ const updateProfilePhoto = async (req, res) => {
         const user = await User.findById(id);
         if (!user) return res.status(404).json({ error: "User not found" });
         user.profilePhoto = linkUrl;
-        await user.save()
-        return res.status(200).json({ linkUrl, message: 'Update profile photo successfully' });
+        await user.save();
+        return res.status(200).json({ linkUrl, message: "Update profile photo successfully" });
     } catch (error) {
         return res.status(400).json({ error });
     }
@@ -104,12 +104,12 @@ const updateCoverPhoto = async (req, res) => {
         const user = await User.findById(id);
         if (!user) return res.status(404).json({ error: "User not found" });
         user.coverPhoto = linkUrl;
-        await user.save()
-        return res.status(200).json({ linkUrl, message: 'Update cover photo successfully' });
+        await user.save();
+        return res.status(200).json({ linkUrl, message: "Update cover photo successfully" });
     } catch (error) {
         return res.status(400).json({ error });
     }
-}
+};
 
 module.exports = {
     createUser,
