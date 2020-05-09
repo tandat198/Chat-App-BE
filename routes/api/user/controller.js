@@ -25,12 +25,12 @@ const createUser = async (req, res) => {
         const { email, name, password, confirmPassword } = reqBody;
 
         for (let field of validatedFields) {
-            if (!reqBody[field]) errors[field] = `Please enter your ${field}`;
+            if (!reqBody[field]) errors[field] = `Please enter your ${field.toUpperCase()}`;
         }
         if (Object.keys(errors).length) return res.status(500).json(errors);
 
         if (password.length < 8) errors.password = "Password is too weak";
-        if (password !== confirmPassword) errors.confirmPassword = "password and confirmPassword does not match";
+        if (password !== confirmPassword) errors.confirmPassword = "Password and confirmPassword does not match";
         if (!isEmail(email)) errors.email = "Email is not valid";
         if (Object.keys(errors).length) return res.status(500).json({ error: errors });
 
@@ -60,15 +60,15 @@ const signIn = async (req, res) => {
     const errors = {};
     const { email, password } = req.body;
     for (let field of validatedFields) {
-        if (isEmpty(req.body[field])) errors[field] = `${field} is required`;
+        if (isEmpty(req.body[field])) errors[field] = `${field.toUpperCase()} is required`;
     }
     if (Object.keys(errors).length) return res.status(500).json(errors);
 
     const user = await User.findOne({ email }).select(["id", "email", "password", "name", "profilePhoto", "coverPhoto"]);
-    if (!user) return res.status(500).json({ error: "email does not exist" });
+    if (!user) return res.status(500).json({ error: "Email does not exist" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(403).json({ error: "password does not match" });
+    if (!isMatch) return res.status(403).json({ error: "Password does not match" });
 
     const resData = {};
     const resColumns = ["id", "email", "name", "coverPhoto", "profilePhoto"];
