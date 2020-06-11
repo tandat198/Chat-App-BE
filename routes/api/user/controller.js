@@ -32,12 +32,12 @@ const createUser = async (req, res) => {
         if (password.length < 8) errors.password = "Password is too weak";
         if (password !== confirmPassword) errors.confirmPassword = "Password and confirmPassword does not match";
         if (!isEmail(email)) errors.email = "Email is not valid";
-        if (Object.keys(errors).length) return res.status(500).json({ error: errors });
+        if (Object.keys(errors).length) return res.status(500).json(errors);
 
         const user = await User.findOne({ email });
         if (user) {
             errors.email = "Email already exists";
-            return res.status(400).json({ error: errors });
+            return res.status(400).json(errors);
         }
         const hash = await hashPass(password, 10);
 
